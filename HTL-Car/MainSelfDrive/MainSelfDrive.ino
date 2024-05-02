@@ -53,7 +53,7 @@ void loop()
     double distanceL = calcDistance(triggerpinsL, echopinL);
     double distanceM = calcDistance(triggerpinsM, echopinM);
 
-    if (distanceM <= 75 && distanceM > 18)
+    if (distanceM <= 75 && distanceM > 18) // i hate niggers
     {
         numTurnRepeats = 0;
         if (distanceL > distanceR)
