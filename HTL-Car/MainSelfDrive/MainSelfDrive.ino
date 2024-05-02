@@ -22,7 +22,7 @@ enum Direction
 unsigned long previousMillis = 0;
 
 Direction direction = FORWARD;
-float velocity = 250;
+float velocity = 255;
 float angle = 0;
 bool stoped = false;
 bool turn = false;
@@ -47,33 +47,48 @@ void loop()
     double distanceL = calcDistance(triggerpinsL, echopinL);
     double distanceM = calcDistance(triggerpinsM, echopinM);
 
-    if (distanceM < 75)
+
+    Serial.print("DistanceL: ");
+    Serial.print(distanceL);
+    
+    Serial.print(" DistanceM: ");
+    Serial.print(distanceM);
+
+    Serial.print(" DistanceR: ");
+    Serial.println(distanceR);
+
+    if (distanceM < 65 && distanceM > 15)
     {
-        if (distanceL < 10 || distanceR < 10 || distanceM < 10)
-        {
-            if (distanceL > distanceR)
-            {
-                Antrieb.Wende(false, velocity);
-            }
-            else if (distanceL < distanceR)
-            {
-                Antrieb.Wende(true, velocity);
-            }
-        }
         if (distanceL > distanceR)
         {
-            angle = map(distanceL, 0, 30, 0, 200) / 100.0;
+            angle = map(distanceL, 0, 40, 0, 200) / 100.0;
         }
         else if (distanceL < distanceR)
         {
-            angle = map(distanceR, 0, 30, 0, -200) / 100.0;
+            angle = map(distanceR, 0, 40, 0, -200) / 100.0;
         }
+        Antrieb.Kurve(angle, velocity, direction);
     }
-    else
+    else if (distanceM > 65)
     {
         angle = 0;
+        Antrieb.Kurve(angle, velocity, direction);
     }
-    Antrieb.Kurve(angle, velocity, direction);
+    else if (distanceM < 15 || distanceL < 15 || distanceR < 15 || distanceM < 790 || distanceL < 790 || distanceR < 790)
+    {
+        if (distanceL > distanceR)
+        {
+            angle = map(distanceL, 0, 15, 0, -100) / 100.0;
+        }
+        else if (distanceL < distanceR)
+        {
+            angle = map(distanceR, 0, 15, 0, 100) / 100.0;
+        }
+        direction = BACKWARD;
+        Antrieb.Kurve(angle, velocity, direction);
+        delay(500);
+        direction = FORWARD;
+    }
 }
 
 double calcDistance(int triggerPin, int echoPin)
