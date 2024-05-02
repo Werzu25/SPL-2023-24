@@ -13,6 +13,9 @@ CMotor MotorLinks(5, 4);
 CMotor MotorRechts(3, 2);
 CAntrieb Antrieb(&MotorLinks, &MotorRechts);
 
+SoftwareSerial bt(11, 10);
+
+
 enum Direction
 {
     FORWARD = true,
@@ -32,6 +35,7 @@ double distance = 0;
 void setup()
 {
     Serial.begin(115200);
+    bt.begin(9600);
 
     pinMode(triggerpinsL, OUTPUT);
     pinMode(triggerpinsM, OUTPUT);
@@ -48,24 +52,24 @@ void loop()
     double distanceM = calcDistance(triggerpinsM, echopinM);
 
 
-    Serial.print("DistanceL: ");
-    Serial.print(distanceL);
+    bt.print("DistanceL: ");
+    bt.print(distanceL);
     
-    Serial.print(" DistanceM: ");
-    Serial.print(distanceM);
+    bt.print(" DistanceM: ");
+    bt.print(distanceM);
 
-    Serial.print(" DistanceR: ");
-    Serial.println(distanceR);
+    bt.print(" DistanceR: ");
+    bt.println(distanceR);
 
-    if (distanceM < 65 && distanceM > 15)
+    if (distanceM < 65 && distanceM > 18)
     {
         if (distanceL > distanceR)
         {
-            angle = map(distanceL, 0, 40, 0, 200) / 100.0;
+            angle = map(distanceL, 0, 45, 0, 200) / 100.0;
         }
         else if (distanceL < distanceR)
         {
-            angle = map(distanceR, 0, 40, 0, -200) / 100.0;
+            angle = map(distanceR, 0, 45, 0, -200) / 100.0;
         }
         Antrieb.Kurve(angle, velocity, direction);
     }
@@ -74,15 +78,15 @@ void loop()
         angle = 0;
         Antrieb.Kurve(angle, velocity, direction);
     }
-    else if (distanceM < 15 || distanceL < 15 || distanceR < 15 || distanceM < 790 || distanceL < 790 || distanceR < 790)
+    else if ((distanceM < 18 || distanceL < 18 || distanceR < 18 )|| (distanceM < 790 || distanceL < 790 || distanceR < 790))
     {
         if (distanceL > distanceR)
         {
-            angle = map(distanceL, 0, 15, 0, -100) / 100.0;
+            angle = map(distanceL, 0, 18, 0, -100) / 100.0;
         }
         else if (distanceL < distanceR)
         {
-            angle = map(distanceR, 0, 15, 0, 100) / 100.0;
+            angle = map(distanceR, 0, 18, 0, 100) / 100.0;
         }
         direction = BACKWARD;
         Antrieb.Kurve(angle, velocity, direction);
