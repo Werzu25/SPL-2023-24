@@ -1,5 +1,6 @@
 #include <FahrzeugLib.h>
 #include <SoftwareSerial.h>
+#include "./Audio/Audio.cpp"
 
 #define triggerpinsL 6
 #define triggerpinsM 8
@@ -9,20 +10,20 @@
 #define echopinM 9
 #define echopinR 12
 
+unsigned long previousMillis = 0;
+
+Audio audio(13);
 CMotor MotorLinks(5, 4);
 CMotor MotorRechts(3, 2);
 CAntrieb Antrieb(&MotorLinks, &MotorRechts);
 
 SoftwareSerial bt(11, 10);
 
-
 enum Direction
 {
     FORWARD = true,
     BACKWARD = false,
 };
-
-unsigned long previousMillis = 0;
 
 Direction direction = FORWARD;
 float velocity = 255;
@@ -32,11 +33,12 @@ bool turn = false;
 
 double distance = 0;
 
+int numTurnRepeats = 0;
+
 void setup()
 {
     Serial.begin(115200);
     bt.begin(9600);
-
     pinMode(triggerpinsL, OUTPUT);
     pinMode(triggerpinsM, OUTPUT);
     pinMode(triggerpinsR, OUTPUT);
@@ -51,35 +53,27 @@ void loop()
     double distanceL = calcDistance(triggerpinsL, echopinL);
     double distanceM = calcDistance(triggerpinsM, echopinM);
 
-
-    bt.print("DistanceL: ");
-    bt.print(distanceL);
-    
-    bt.print(" DistanceM: ");
-    bt.print(distanceM);
-
-    bt.print(" DistanceR: ");
-    bt.println(distanceR);
-
-    if (distanceM < 65 && distanceM > 18)
+    if (distanceM <= 75 && distanceM > 18)
     {
+        numTurnRepeats = 0;
         if (distanceL > distanceR)
         {
-            angle = map(distanceL, 0, 45, 0, 200) / 100.0;
+            angle = map(distanceL, 0, 50, 0, 200) / 100.0;
         }
         else if (distanceL < distanceR)
         {
-            angle = map(distanceR, 0, 45, 0, -200) / 100.0;
+            angle = map(distanceR, 0, 50, 0, -200) / 100.0;
         }
         Antrieb.Kurve(angle, velocity, direction);
     }
-    else if (distanceM > 65)
+    else if (distanceM > 75)
     {
         angle = 0;
         Antrieb.Kurve(angle, velocity, direction);
     }
-    else if ((distanceM < 18 || distanceL < 18 || distanceR < 18 )|| (distanceM < 790 || distanceL < 790 || distanceR < 790))
+    else if ((distanceM < 18 || distanceL < 18 || distanceR < 18) || (distanceM < 790 || distanceL < 790 || distanceR < 790))
     {
+        audio.startAudio(5000);
         if (distanceL > distanceR)
         {
             angle = map(distanceL, 0, 18, 0, -100) / 100.0;
@@ -90,8 +84,10 @@ void loop()
         }
         direction = BACKWARD;
         Antrieb.Kurve(angle, velocity, direction);
-        delay(500);
+        numTurnRepeats++;
+        delay(500 + (numTurnRepeats * 100));
         direction = FORWARD;
+        audio.stopAudio();
     }
 }
 
