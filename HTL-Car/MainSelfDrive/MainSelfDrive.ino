@@ -47,22 +47,22 @@ void setup()
     pinMode(echopinR, INPUT);
 }
 
-void loop()
+void loop()// i love dicks
 {
     double distanceR = calcDistance(triggerpinsR, echopinR);
     double distanceL = calcDistance(triggerpinsL, echopinL);
     double distanceM = calcDistance(triggerpinsM, echopinM);
 
-    if (distanceM <= 75 && distanceM > 18) // i hate niggers
+    if (distanceM <= 75 && distanceM > 18)
     {
         numTurnRepeats = 0;
         if (distanceL > distanceR)
         {
-            angle = map(distanceL, 0, 50, 0, 200) / 100.0;
+            angle = map(distanceL, 0, 45, 0, 200) / 100.0;
         }
         else if (distanceL < distanceR)
         {
-            angle = map(distanceR, 0, 50, 0, -200) / 100.0;
+            angle = map(distanceR, 0, 45, 0, -200) / 100.0;
         }
         Antrieb.Kurve(angle, velocity, direction);
     }
